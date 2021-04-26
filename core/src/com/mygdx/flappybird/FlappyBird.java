@@ -2,6 +2,7 @@ package com.mygdx.flappybird;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -36,6 +37,7 @@ public class FlappyBird extends ApplicationAdapter {
 	float distanceBetweenTubes;
 
 	int scores = 0;
+	int highScore = 0;
 	int scoringTube = 0;
 	BitmapFont bitmapFont;
 	Texture gameOver;
@@ -52,8 +54,13 @@ public class FlappyBird extends ApplicationAdapter {
 
 	boolean death = false;
 
+	Preferences preferences;
+
 	@Override
 	public void create () {
+
+		preferences = Gdx.app.getPreferences("My Preferences");
+		highScore = preferences.getInteger("HIGHSCORE",0);
 
 		dead = Gdx.audio.newSound(Gdx.files.internal("Dead.mp3"));
 		fly = Gdx.audio.newSound(Gdx.files.internal("Fly.mp3"));
@@ -136,6 +143,12 @@ public class FlappyBird extends ApplicationAdapter {
 				birdY -= velocity;
 
 			}else {
+				if(scores>highScore){
+					highScore = scores;
+					preferences.putInteger("HIGHSCORE", highScore);
+					preferences.flush();
+				}
+
 				dead.play();
 				gameState = 2;
 			}
@@ -176,6 +189,7 @@ public class FlappyBird extends ApplicationAdapter {
 				birdY);
 
 		bitmapFont.draw(batch, Integer.toString(scores), 200, 200);
+		bitmapFont.draw(batch, Integer.toString(highScore), 800, 200);
 
 		batch.end();
 
@@ -183,6 +197,12 @@ public class FlappyBird extends ApplicationAdapter {
 		for(int i=0;i<numberOfTube;i++){
 			if(Intersector.overlaps(circle, topTubeRectangle[i]) || Intersector.overlaps(circle, bottomTubeRectangle[i])){
 				if(!death) {
+					if(scores>highScore){
+						highScore = scores;
+						preferences.putInteger("HIGHSCORE", highScore);
+						preferences.flush();
+					}
+
 					dead.play();
 					death = true;
 				}
